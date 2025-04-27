@@ -9,6 +9,7 @@ from src.get_search_results import get_search_results
 from src.constants import DATA_PATH
 from src.save_search_results import save_search_results
 from src.extract_content import extract_content
+from src.save_extracted_data import save_extracted_data
 
 
 def get_driver():
@@ -40,7 +41,7 @@ def main():
         content = extract_content(driver, url)
         extracted_data[domain] = content
 
-    print(extracted_data)
+    save_extracted_data(extracted_data, keyword)
 
     driver.quit()
 
