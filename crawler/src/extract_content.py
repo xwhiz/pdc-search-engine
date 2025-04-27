@@ -42,10 +42,10 @@ def extract_content(driver, url: str) -> Dict[str, Any]:
         keywords = ""
 
     headings_tags = body.select("h1, h2, h3, h4, h5, h6")
-    headings_content = list(set(map(lambda x: x.text, headings_tags)))
+    headings_content = list(set(map(lambda x: x.text.strip(), headings_tags)))
 
     paragraphs = body.select("h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p")[:4]
-    paragraphs_content = list(map(lambda x: x.text, paragraphs))
+    paragraphs_content = list(map(lambda x: x.text.strip(), paragraphs))
 
     recommendations = _extract_recommendations(url, body)
 
