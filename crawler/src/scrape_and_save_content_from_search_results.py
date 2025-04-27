@@ -9,7 +9,11 @@ from .save_extracted_data import save_extracted_data
 
 
 def scrape_and_save_content_from_search_results(driver, keyword: str):
-    search_results = get_search_results(keyword)
+    try:
+        search_results = get_search_results(keyword)
+    except FileNotFoundError:
+        print(f"Search results not found for {keyword}")
+        return
 
     # if data is already extracted, skip it
     if os.path.exists(f"{DATA_PATH}/{'-'.join(keyword.split())}/extracted_data.json"):

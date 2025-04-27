@@ -12,20 +12,24 @@ def scrape_duckduckgo_results(driver, query: str) -> List[Dict[str, str]]:
         list: A list of dictionaries containing the search results.
     """
 
-    driver.get(f"http://duckduckgo.com/?q={query}")
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-    articles = soup.select("ol li[data-layout='organic'] article")
-    data: List[Dict[str, str]] = []
+    try:
+        driver.get(f"http://duckduckgo.com/?q={query}")
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+        articles = soup.select("ol li[data-layout='organic'] article")
+        data: List[Dict[str, str]] = []
 
-    for article in articles:
-        data.append(
-            {
-                "heading": article.select_one("h2").text,
-                "link": article.select_one(
-                    "[data-testid='result-extras-url-link']"
-                ).get("href"),
-                "description": article.select_one("[data-result='snippet']").text,
-            }
-        )
+        for article in articles:
+            data.append(
+                {
+                    "heading": article.select_one("h2").text,
+                    "link": article.select_one(
+                        "[data-testid='result-extras-url-link']"
+                    ).get("href"),
+                    "description": article.select_one("[data-result='snippet']").text,
+                }
+            )
 
-    return data
+        return data
+    except Exception as e:
+        print(e)
+        return []
