@@ -16,4 +16,6 @@ def save_search_results(driver, keyword: str):
 
     with open(f"{path}/search_results.json", "w") as f:
         json.dump(search_results, f)
-        print(f"Saved search results to {path}/search_results.json")
+        print(
+            f"Saved {len(search_results)} search results to {path}/search_results.json"
+        )
