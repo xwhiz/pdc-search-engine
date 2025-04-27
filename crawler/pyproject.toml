@@ -1,0 +1,11 @@
+[project]
+name = "crawler"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "bs4>=0.0.2",
+    "selenium>=4.31.0",
+    "webdriver-manager>=4.0.2",
+]
