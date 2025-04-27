@@ -3,20 +3,13 @@ from typing import Dict
 import os
 from .constants import DATA_PATH
 
-from .save_search_results import save_search_results
 from .get_search_results import get_search_results
 from .extract_content import extract_content
 from .save_extracted_data import save_extracted_data
 
 
-def scrape_keyword(driver, keyword: str):
-    save_search_results(driver, keyword)
-
-    try:
-        search_results = get_search_results(keyword)
-    except FileNotFoundError:
-        save_search_results(driver, keyword)
-        search_results = get_search_results(keyword)
+def scrape_and_save_content_from_search_results(driver, keyword: str):
+    search_results = get_search_results(keyword)
 
     # if data is already extracted, skip it
     if os.path.exists(f"{DATA_PATH}/{'-'.join(keyword.split())}/extracted_data.json"):
