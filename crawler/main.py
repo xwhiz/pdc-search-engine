@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import os
 
 from src.get_search_results import get_search_results
 from src.constants import DATA_PATH
@@ -34,6 +35,10 @@ def main():
     except FileNotFoundError:
         save_search_results(driver, keyword)
         search_results = get_search_results(keyword)
+
+    # if data is already extracted, skip it
+    if os.path.exists(f"{DATA_PATH}/{'-'.join(keyword.split())}/extracted_data.json"):
+        return
 
     extracted_data: Dict[str, Dict] = dict()
     for url in map(lambda x: x["link"], search_results):
