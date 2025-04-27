@@ -11,7 +11,6 @@ def search_and_save_results(driver, keyword: str):
         return
 
     os.makedirs(path)
-    print(f"Created directory: {path}")
     search_results = scrape_duckduckgo_results(driver, keyword)
 
     with open(f"{path}/search_results.json", "w") as f:

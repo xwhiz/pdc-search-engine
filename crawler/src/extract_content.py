@@ -13,8 +13,13 @@ def extract_content(driver, url: str) -> Dict[str, Any]:
     Returns:
         dict: A dictionary containing the extracted content.
     """
-    driver.get(url)
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    try:
+        driver.get(url)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
+    except Exception as e:
+        print(e)
+        return {}
+
     head = soup.find("head")
     body = soup.find("body")
 
