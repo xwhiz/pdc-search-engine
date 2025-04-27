@@ -23,7 +23,12 @@ def extract_content(driver, url: str) -> Dict[str, Any]:
     head = soup.find("head")
     body = soup.find("body")
 
-    title = head.select_one("title").text
+    title = head.select_one("title")
+    if title is not None:
+        title = title.text
+    else:
+        title = ""
+
     description = head.select_one("meta[name='description']")
     if description is not None:
         description = description.get("content")
