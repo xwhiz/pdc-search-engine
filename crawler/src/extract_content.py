@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+import requests
 
 
 def extract_content(driver, url: str) -> Dict[str, Any]:
@@ -14,10 +15,12 @@ def extract_content(driver, url: str) -> Dict[str, Any]:
         dict: A dictionary containing the extracted content.
     """
     try:
-        driver.get(url)
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+        # driver.get(url)
+        content = requests.get(url)
+        soup = BeautifulSoup(content.text, "html.parser")
+        print(soup.select("title"))
     except Exception as e:
-        print(e)
+        print("Exc", url, e)
         return {}
 
     head = soup.find("head")
