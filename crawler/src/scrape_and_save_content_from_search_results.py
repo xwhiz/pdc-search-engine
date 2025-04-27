@@ -15,8 +15,8 @@ def scrape_and_save_content_from_search_results(driver, keyword: str):
         print(f"Search results not found for {keyword}")
         return
 
-    # if data is already extracted, skip it
     if os.path.exists(f"{DATA_PATH}/{'-'.join(keyword.split())}/extracted_data.json"):
+        print(f"Extracted data already exists for {keyword}")
         return
 
     extracted_data: Dict[str, Dict] = dict()
