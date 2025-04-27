@@ -11,4 +11,4 @@ def save_extracted_data(data: dict, keyword: str):
 
     with open(f"{path}/extracted_data.json", "w") as f:
         json.dump(data, f)
-        print(f"Saved {len(data.values())} extracted data to {path}")
+        print(f"[Saved]: {len(data.values())} extracted data to {path}")

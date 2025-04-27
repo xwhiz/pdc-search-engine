@@ -8,7 +8,7 @@ from .extract_content import extract_content
 from .save_extracted_data import save_extracted_data
 
 
-def scrape_and_save_content_from_search_results(driver, keyword: str):
+def scrape_and_save_content_from_search_results(keyword: str):
     try:
         search_results = get_search_results(keyword)
     except FileNotFoundError:
@@ -22,7 +22,7 @@ def scrape_and_save_content_from_search_results(driver, keyword: str):
     extracted_data: Dict[str, Dict] = dict()
     for url in map(lambda x: x["link"], search_results):
         domain = urlparse(url).netloc
-        content = extract_content(driver, url)
+        content = extract_content(url)
         extracted_data[domain] = content
 
     save_extracted_data(extracted_data, keyword)
