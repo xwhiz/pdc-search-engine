@@ -19,8 +19,12 @@ def scrape_and_save_content_from_search_results(keyword: str):
         print(f"Extracted data already exists for {keyword}")
         return
 
+    save_from_links([result["link"] for result in search_results], keyword)
+
+
+def save_from_links(links: list, keyword: str):
     extracted_data: Dict[str, Dict] = dict()
-    for url in map(lambda x: x["link"], search_results):
+    for url in links:
         domain = urlparse(url).netloc
         content = extract_content(url)
         extracted_data[domain] = content
