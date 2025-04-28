@@ -1,9 +1,8 @@
-from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import threading as th
-from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
+import os
 
 from src.scrape_and_save_content_from_search_results import (
     scrape_and_save_content_from_search_results,
@@ -42,20 +41,30 @@ def get_driver(headless=False, eager=False):
         return get_driver(headless, eager)
 
 
+def delete_extracted_data(keywords: list):
+    for keyword in keywords:
+        file = f"{DATA_PATH}/{'-'.join(keyword.split())}/extracted_data.json"
+        # delete file if it exists
+        if os.path.exists(file):
+            os.remove(file)
+
+
 def scrape_multithread(keywords, drivers, fn):
     keywords = keywords.readlines()
 
     threads = []
-    for keyword in tqdm(keywords):
+    for keyword in keywords:
         if drivers is not None:
-            threads.append(th.Thread(target=fn, args=(drivers[0], keyword.strip())))
+            thread = th.Thread(target=fn, args=(drivers[0], keyword.strip()))
+            threads.append(thread)
         else:
-            threads.append(th.Thread(target=fn, args=(keyword.strip(),)))
+            thread = th.Thread(target=fn, args=(keyword.strip(),))
+            threads.append(thread)
+            print(f"[Threads working]: {len(threads)}")
+
+        thread.start()
 
         if len(threads) == THREAD_COUNT:
-            for thread in threads:
-                thread.start()
-
             for thread in threads:
                 thread.join()
 
