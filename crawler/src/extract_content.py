@@ -15,7 +15,7 @@ def extract_content(url: str) -> Dict[str, Any]:
         dict: A dictionary containing the extracted content.
     """
     try:
-        content = requests.get(url)
+        content = requests.get(url, timeout=8)
         soup = BeautifulSoup(content.text, "html.parser")
     except Exception as e:
         print("Exc", url, e)
