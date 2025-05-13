@@ -1,7 +1,6 @@
 import os
 import json
 from collections import defaultdict
-import heapq
 
 from src.constants import DATA_PATH
 
