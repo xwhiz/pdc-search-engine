@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-montserrat-sans);
+  --color-primary: #1abc9c;
+  --color-primary-dark: #16a085;
+  --color-accent: #2c3e50;
+}
+
 body {
-  font-family: var(--font-montserrat-sans);
+  font-family: var(--font-sans);
 }
