@@ -4,6 +4,7 @@ import Logo from "./components/Logo";
 import { AnimatePresence, motion } from "motion/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { Loader } from "lucide-react";
 
 export default function Home() {
   let router = useRouter();
@@ -26,17 +27,40 @@ export default function Home() {
       if (isFirstView) return;
 
       setIsLoading(true);
+      async function fetchResults() {
+        const url = process.env.NEXT_PUBLIC_URL;
+        const query = params.get("q");
+        console.log(url, query);
+        const searchQuery = `url:${query}\\n`;
 
-      setTimeout(() => setIsLoading(false), 2000);
+        const searchParams = new URLSearchParams({
+          "q.op": "OR",
+          q: `title:${query}\nurl:${query}\nheadings:${query}\ndescription:${query}\nparagraph:${query}`,
+          sort: "page_rank desc",
+          wt: "json",
+        });
+
+        console.log(searchParams.toString());
+
+        let response = await fetch(
+          `${url}/solr/main_core/select?${searchParams.toString()}`
+        );
+        let results = await response.json();
+        console.log(results);
+
+        setIsLoading(false);
+      }
+
+      fetchResults();
     },
     [params]
   );
 
   return (
-    <div className="">
+    <div className="container mx-auto">
       <motion.header
         layout
-        className={`flex items-center gap-2 p-4 w-full ${
+        className={`flex flex-wrap items-center gap-2 p-4 w-full ${
           isFirstView
             ? "flex-col justify-center h-screen"
             : "h-min justify-between items-center"
@@ -96,13 +120,20 @@ export default function Home() {
               className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary focus:border-primary"
               placeholder="Search..."
               required
+              defaultValue={params.get("q") ?? ""}
             />
           </div>
         </form>
 
         {!isFirstView && <span className="opacity-0">ASDFA</span>}
       </motion.header>
-      <main className="">{isLoading && <div> Loading ...</div>}</main>
+      <main className="p-4">
+        {isLoading && (
+          <div className="h-80 w-full flex justify-center items-center">
+            <Loader className="animate-spin w-8 h-8 text-primary" />
+          </div>
+        )}
+      </main>
       <footer className=""></footer>
     </div>
   );
