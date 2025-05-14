@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  solr:
+    image: solr:8-slim
+    container_name: solr
+    ports:
+      - "8983:8983"
+    volumes:
+      - solr_data:/var/solr
+    environment:
+      - SOLR_CORE=main_core
+    command:
+      - solr-precreate
+      - main_core
+
+  crawler:
+    build:
+      context: ./crawler
+      dockerfile: Dockerfile
+    environment:
+      - URL=http://solr:8983
+      - DATA_PATH=./data
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - solr
+
+  frontend:
+    build:
+      context: ./search-engine
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_URL=http://localhost:8983
+    depends_on:
+      - solr
+      - crawler
+
+volumes:
+  solr_data:
