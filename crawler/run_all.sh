@@ -2,8 +2,10 @@
 
 set -e
 
+source .venv/bin/activate
+
 echo "Running prepare data"
-python prepare_data.py
+uv run prepare_data.py
 
 echo "Running upload data"
-python upload_to_solr.py
+uv run upload_to_solr.py

@@ -1,8 +1,11 @@
 import os
 import json
 from collections import defaultdict
+from dotenv import load_dotenv
 
 from src.constants import DATA_PATH
+
+load_dotenv()
 
 
 def main():
@@ -11,6 +14,7 @@ def main():
         for dr in os.listdir(DATA_PATH)
         if os.path.isdir(f"{DATA_PATH}/{dr}")
     ]
+    print(directories)
     all_pages = []
 
     for directory in directories:

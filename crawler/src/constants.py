@@ -1,8 +1,7 @@
 import os
+from dotenv import load_dotenv
 
-try:
-    DATA_PATH = os.environ["DATA_PATH"]
-except KeyError:
-    DATA_PATH = "./data"
+load_dotenv()
 
+DATA_PATH = os.environ.get("DATA_PATH")
 THREAD_COUNT = 10

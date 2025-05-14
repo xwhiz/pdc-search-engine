@@ -1,14 +1,14 @@
 import requests
 import os
+from dotenv import load_dotenv
 
 from src.constants import DATA_PATH
 
+load_dotenv()
+
 
 def main():
-    try:
-        url = os.environ["URL"]
-    except KeyError:
-        url = "http://localhost:8983"
+    url = os.environ.get("URL")
 
     with open(f"{DATA_PATH}/all_data.json", "r") as f:
         data = f.read()
