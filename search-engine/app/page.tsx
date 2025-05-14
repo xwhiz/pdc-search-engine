@@ -2,7 +2,7 @@
 import Logo from "./components/Logo";
 import { motion } from "motion/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { Loader } from "lucide-react";
 
 type SearchResult = {
@@ -13,7 +13,7 @@ type SearchResult = {
   headings: string[];
 };
 
-export default function Home() {
+function Home() {
   const router = useRouter();
   const params = useSearchParams();
   const pathname = usePathname();
@@ -230,5 +230,13 @@ export default function Home() {
         © {new Date().getFullYear()} Snapi Search. All rights reserved.
       </footer>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense>
+      <Home />
+    </Suspense>
   );
 }
