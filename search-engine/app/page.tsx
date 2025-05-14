@@ -39,10 +39,15 @@ export default function Home() {
     setIsLoading(true);
     async function fetchResults() {
       const url = process.env.NEXT_PUBLIC_URL;
-      const query = params.get("q");
+      const query = params.get("q") ?? "";
       const searchParams = new URLSearchParams({
-        "q.op": "OR",
-        q: `title:${query}\nurl:${query}\nheadings:${query}\ndescription:${query}\nparagraph:${query}`,
+        defType: "edismax",
+        q: query,
+        qf: "title^4 url^3 headings^2 description^1 paragraph^0.5 keywords^0.5",
+        mm: "2<75%",
+        spellcheck: "true",
+        "spellcheck.q": query,
+        // q: `title:${query}\nurl:${query}\nheadings:${query}\ndescription:${query}\nparagraph:${query}`,
         sort: "page_rank desc",
         wt: "json",
         start: "" + page,
@@ -82,17 +87,19 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4">
       <motion.header
-        layout
-        className={`flex flex-wrap items-center gap-2 p-4 w-full ${
+        layout="position"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          duration: 0.6,
+          bounce: 0.3,
+        }}
+        className={`flex flex-wrap items-center gap-2 p-4 w-full transition-all ${
           isFirstView
             ? "flex-col justify-center h-screen"
             : "h-min justify-between items-center"
         }`}
-        transition={{
-          type: "spring",
-          visualDuration: 0.2,
-          bounce: 0.2,
-        }}
       >
         <Logo />
 
@@ -144,26 +151,32 @@ export default function Home() {
         {!isFirstView && <span className="opacity-0">placeholder</span>}
       </motion.header>
 
-      <main className="p-4 space-y-6">
+      <main className="p-4 space-y-6 w-full">
         {isLoading ? (
           <div className="h-80 w-full flex justify-center items-center">
             <Loader className="animate-spin w-8 h-8 text-primary" />
           </div>
         ) : (
-          <>
-            <p className="text-sm text-gray-500">
-              About {totalFound.toLocaleString()} results
-              {searchTime !== null && ` (${searchTime.toFixed(2)} seconds)`}
-            </p>
+          <div className="max-w-prose mx-auto">
+            {searchResults.length !== 0 && (
+              <p className="text-sm text-gray-500">
+                About {totalFound.toLocaleString()} results
+                {searchTime !== null && ` (${searchTime.toFixed(2)} seconds)`}
+              </p>
+            )}
 
             <div className="space-y-6">
+              {searchResults.length === 0 && (
+                <div className="text-center">No results found.</div>
+              )}
+
               {searchResults.map((result) => (
                 <a
                   key={result.id}
                   href={result.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block group transition-all hover:translate-x-1"
+                  className="block group transition-all hover:translate-x-0.5"
                 >
                   <h2 className="text-lg font-semibold text-primary group-hover:underline max-w-prose">
                     {result.title}
@@ -173,9 +186,16 @@ export default function Home() {
                       {result.description}
                     </p>
                   )}
-                  <span className="text-xs text-accent mt-1 block">
-                    {result.url}
-                  </span>
+
+                  {result.headings?.length > 0 && (
+                    <ul className="mt-1 text-sm text-gray-500 list-disc list-inside space-y-1">
+                      {result.headings.slice(0, 3).map((heading, idx) => (
+                        <li key={idx} className="line-clamp-1">
+                          {heading}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </a>
               ))}
             </div>
@@ -202,12 +222,12 @@ export default function Home() {
                 Next
               </button>
             </div>
-          </>
+          </div>
         )}
       </main>
 
       <footer className="py-4 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} Vyro Search. All rights reserved.
+        © {new Date().getFullYear()} Snapi Search. All rights reserved.
       </footer>
     </div>
   );
