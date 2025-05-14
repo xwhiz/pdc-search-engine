@@ -14,7 +14,8 @@ def main():
         for dr in os.listdir(DATA_PATH)
         if os.path.isdir(f"{DATA_PATH}/{dr}")
     ]
-    print(directories)
+    print(len(os.listdir("./data")))
+    print("DATA_PATH:", DATA_PATH)
     all_pages = []
 
     for directory in directories:

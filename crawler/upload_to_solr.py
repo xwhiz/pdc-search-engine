@@ -13,6 +13,8 @@ def main():
     with open(f"{DATA_PATH}/all_data.json", "r") as f:
         data = f.read()
 
+    print("SOLR URL ENV", url)
+
     solr_url = f"{url}/solr/main_core/update?commit=true"
     empty_solr(solr_url)
 

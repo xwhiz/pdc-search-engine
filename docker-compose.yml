@@ -21,7 +21,7 @@ services:
       - DATA_PATH=./data
     env_file: ./crawler/.env
     volumes:
-      - ./data:/app/data
+      - ./crawler/data:/app/data
     depends_on:
       - solr
 
