@@ -1,19 +1,30 @@
 "use client";
-import Image from "next/image";
 import Logo from "./components/Logo";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { Loader } from "lucide-react";
 
-export default function Home() {
-  let router = useRouter();
-  let params = useSearchParams();
-  let pathname = usePathname();
-  let [searchResults, setSearchResults] = useState([]);
-  let [isLoading, setIsLoading] = useState(false);
+type SearchResult = {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  headings: string[];
+};
 
-  let isFirstView = params.size === 0;
+export default function Home() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rows, setRows] = useState(10);
+  const [totalFound, setTotalFound] = useState(0);
+  const [searchTime, setSearchTime] = useState<number | null>(null);
+
+  const isFirstView = params.size === 0;
 
   function handleSearchFormSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,42 +33,54 @@ export default function Home() {
     router.push(`${pathname}?${params.toString()}`);
   }
 
-  useEffect(
-    function getSearchResults() {
-      if (isFirstView) return;
+  useEffect(() => {
+    if (isFirstView) return;
 
-      setIsLoading(true);
-      async function fetchResults() {
-        const url = process.env.NEXT_PUBLIC_URL;
-        const query = params.get("q");
-        console.log(url, query);
-        const searchQuery = `url:${query}\\n`;
+    setIsLoading(true);
+    async function fetchResults() {
+      const url = process.env.NEXT_PUBLIC_URL;
+      const query = params.get("q");
+      const searchParams = new URLSearchParams({
+        "q.op": "OR",
+        q: `title:${query}\nurl:${query}\nheadings:${query}\ndescription:${query}\nparagraph:${query}`,
+        sort: "page_rank desc",
+        wt: "json",
+        start: "" + page,
+        rows: "" + rows,
+      });
 
-        const searchParams = new URLSearchParams({
-          "q.op": "OR",
-          q: `title:${query}\nurl:${query}\nheadings:${query}\ndescription:${query}\nparagraph:${query}`,
-          sort: "page_rank desc",
-          wt: "json",
-        });
+      const start = performance.now();
+      const response = await fetch(
+        `${url}/solr/main_core/select?${searchParams.toString()}`
+      );
+      const end = performance.now();
 
-        console.log(searchParams.toString());
+      const results = await response.json();
+      const data = results.response;
 
-        let response = await fetch(
-          `${url}/solr/main_core/select?${searchParams.toString()}`
-        );
-        let results = await response.json();
-        console.log(results);
+      setTotalFound(data.numFound);
+      setSearchTime((end - start) / 1000);
 
-        setIsLoading(false);
-      }
+      setSearchResults(
+        data.docs.map(
+          (doc: any): SearchResult => ({
+            id: doc.id,
+            title: doc.title?.join("").trim(),
+            description: doc.description?.join("").trim() || undefined,
+            url: doc.url?.join("").trim(),
+            headings: doc.headings,
+          })
+        )
+      );
 
-      fetchResults();
-    },
-    [params]
-  );
+      setIsLoading(false);
+    }
+
+    fetchResults();
+  }, [params, page, rows]);
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto px-4">
       <motion.header
         layout
         className={`flex flex-wrap items-center gap-2 p-4 w-full ${
@@ -77,7 +100,7 @@ export default function Home() {
           <motion.p
             key="desc-box"
             exit={{ opacity: 0, scale: 0 }}
-            className="text-base"
+            className="text-base text-gray-500"
           >
             The next gen Search Engine.
           </motion.p>
@@ -89,17 +112,19 @@ export default function Home() {
           }`}
           onSubmit={handleSearchFormSubmit}
         >
-          <label
-            htmlFor="search"
-            className="mb-2 text-sm font-medium text-gray-900 sr-only"
-          >
-            Search
-          </label>
           <div className="relative">
+            <input
+              type="search"
+              id="search"
+              name="search"
+              className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-full bg-gray-50 focus:ring-accent focus:border-accent shadow-sm"
+              placeholder="Search..."
+              required
+              defaultValue={params.get("q") ?? ""}
+            />
             <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
               <svg
-                className="w-4 h-4 text-gray-500"
-                aria-hidden="true"
+                className="w-4 h-4 text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 20 20"
@@ -113,28 +138,77 @@ export default function Home() {
                 />
               </svg>
             </div>
-            <input
-              type="search"
-              id="search"
-              name="search"
-              className="block w-full p-3 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary focus:border-primary"
-              placeholder="Search..."
-              required
-              defaultValue={params.get("q") ?? ""}
-            />
           </div>
         </form>
 
-        {!isFirstView && <span className="opacity-0">ASDFA</span>}
+        {!isFirstView && <span className="opacity-0">placeholder</span>}
       </motion.header>
-      <main className="p-4">
-        {isLoading && (
+
+      <main className="p-4 space-y-6">
+        {isLoading ? (
           <div className="h-80 w-full flex justify-center items-center">
             <Loader className="animate-spin w-8 h-8 text-primary" />
           </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500">
+              About {totalFound.toLocaleString()} results
+              {searchTime !== null && ` (${searchTime.toFixed(2)} seconds)`}
+            </p>
+
+            <div className="space-y-6">
+              {searchResults.map((result) => (
+                <a
+                  key={result.id}
+                  href={result.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group transition-all hover:translate-x-1"
+                >
+                  <h2 className="text-lg font-semibold text-primary group-hover:underline max-w-prose">
+                    {result.title}
+                  </h2>
+                  {result.description && (
+                    <p className="text-sm text-gray-700 mt-1 line-clamp-3 max-w-prose">
+                      {result.description}
+                    </p>
+                  )}
+                  <span className="text-xs text-accent mt-1 block">
+                    {result.url}
+                  </span>
+                </a>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center pt-6">
+              <button
+                onClick={() => setPage((prev) => Math.max(prev - rows, 0))}
+                disabled={page === 0}
+                className="px-4 py-2 rounded-full bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-50 transition"
+              >
+                Previous
+              </button>
+
+              <span className="text-sm text-gray-600">
+                Page {Math.floor(page / rows) + 1} of{" "}
+                {Math.ceil(totalFound / rows)}
+              </span>
+
+              <button
+                onClick={() => setPage((prev) => prev + rows)}
+                disabled={page + rows >= totalFound}
+                className="px-4 py-2 rounded-full bg-accent/10 text-accent hover:bg-accent/20 disabled:opacity-50 transition"
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </main>
-      <footer className=""></footer>
+
+      <footer className="py-4 text-center text-xs text-gray-400">
+        © {new Date().getFullYear()} Vyro Search. All rights reserved.
+      </footer>
     </div>
   );
 }
