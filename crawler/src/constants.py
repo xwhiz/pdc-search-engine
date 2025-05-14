@@ -1,5 +1,8 @@
-# import os
+import os
 
-DATA_PATH = "../data"
-# THREAD_COUNT = os.cpu_count() - 1
+try:
+    DATA_PATH = os.environ["DATA_PATH"]
+except KeyError:
+    DATA_PATH = "./data"
+
 THREAD_COUNT = 10
