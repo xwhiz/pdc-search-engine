@@ -8,6 +8,7 @@ services:
       - solr_data:/var/solr
     environment:
       - SOLR_CORE=main_core
+      - SOLR_OPTS=-Djetty.host=0.0.0.0
     command:
       - solr-precreate
       - main_core
@@ -36,7 +37,6 @@ services:
     env_file: ./search-engine/.env.local
     depends_on:
       - solr
-      - crawler
 
 volumes:
   solr_data:

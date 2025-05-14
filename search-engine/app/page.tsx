@@ -30,6 +30,8 @@ function Home() {
     e.preventDefault();
     const params = new URLSearchParams();
     params.set("q", (e.target as HTMLFormElement).search.value);
+    setPage(0);
+    setRows(10);
     router.push(`${pathname}?${params.toString()}`);
   }
 
@@ -56,7 +58,7 @@ function Home() {
 
       const start = performance.now();
       const response = await fetch(
-        `${url}/solr/main_core/select?${searchParams.toString()}`
+        `/solr/main_core/select?${searchParams.toString()}`
       );
       const end = performance.now();
 
