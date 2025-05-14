@@ -5,7 +5,7 @@ WORKDIR /app
 RUN pip install uv
 
 COPY . .
-COPY ../data ../data
+COPY ./data ./data
 
 RUN uv venv
 RUN uv sync
